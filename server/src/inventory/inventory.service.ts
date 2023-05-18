@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -23,13 +23,21 @@ export class InventoryService {
   async addInventory(inventory: InventoryInterface): Promise<Inventory> {
     const newInventory = await this.inventoryRepository.create(inventory);
     const id = inventory.itemId;
+    const isInventoryExist = await this.inventoryRepository.findOne({
+      where: { itemId: id },
+    });
+    if (isInventoryExist)
+      throw new BadRequestException('Inventory already exist');
     const item = await this.itemsRepository.findOne({ where: { id } });
     newInventory.item = item;
     return await this.inventoryRepository.save(newInventory);
   }
 
   async getInventory(id: number): Promise<Inventory> {
-    return await this.inventoryRepository.findOne({ where: { id } });
+    return await this.inventoryRepository.findOne({
+      where: { id },
+      relations: { item: true },
+    });
   }
 
   async updateInventory(
@@ -42,6 +50,9 @@ export class InventoryService {
   }
 
   async getInventories(): Promise<Inventory[]> {
-    return await this.inventoryRepository.find();
+    return await this.inventoryRepository
+      .createQueryBuilder('inventory')
+      .leftJoinAndSelect('inventory.item', 'item')
+      .getMany();
   }
 }

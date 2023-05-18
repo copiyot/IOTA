@@ -22,6 +22,7 @@ export class Inventory {
   @Column()
   itemId: number;
 
+  @ApiProperty({ type: () => Item })
   @OneToOne(() => Item, (item) => item.itemInfo, { onDelete: 'CASCADE' })
   @JoinColumn()
   item: Item;

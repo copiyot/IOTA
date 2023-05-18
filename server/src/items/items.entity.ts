@@ -28,6 +28,7 @@ export class Item {
   @Column()
   price: number;
 
+  @ApiProperty({ type: () => [Order] })
   @OneToMany(() => Order, (order) => order.item)
   orders: Order[];
 

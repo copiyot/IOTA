@@ -5,6 +5,10 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors({
+    origin: 'http://localhost:3000',
+  });
+
   const config = new DocumentBuilder()
     .setTitle('Supply Chain API Doc')
     .setDescription('IOTA takeaway assignment API documentaion')
@@ -16,9 +20,9 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   await app
-    .listen(3000)
+    .listen(4040)
     .then(() => {
-      console.log('successfully stared on port 3000');
+      console.log('successfully stared on port 4040');
     })
     .catch((error) => {
       console.log(error);

@@ -10,6 +10,7 @@ const typeOrmConfig: SqliteConnectionOptions = {
   database: 'SupplyChainDB',
   entities: [Item, Order, Inventory],
   synchronize: __prod__,
+  logging: __prod__,
 };
 
 export default typeOrmConfig;

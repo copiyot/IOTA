@@ -21,7 +21,10 @@ export class Order {
   @Column()
   state: string;
 
-  @ManyToOne(() => Item, (item) => item.orders, { onDelete: 'SET NULL' })
+  @ApiProperty({ type: () => Item })
+  @ManyToOne(() => Item, (item) => item.orders, {
+    onDelete: 'CASCADE',
+  })
   item: Item;
 
   constructor(quantity: number, state: string) {

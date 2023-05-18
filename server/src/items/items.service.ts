@@ -37,6 +37,10 @@ export class ItemsService {
   }
 
   async getItems(): Promise<Item[]> {
-    return await this.itemsRepository.find();
+    return await this.itemsRepository.find({
+      relations: {
+        orders: true,
+      },
+    });
   }
 }

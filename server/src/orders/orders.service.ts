@@ -24,22 +24,21 @@ export class OrdersService {
   ) {}
 
   async addOrder(order: OderInterface): Promise<Order> {
-    const newOrder = await this.ordersRepository.create(order);
     const id = order.itemId;
     const itemInventory = await this.inventoryRepository.findOne({
       where: { itemId: id },
     });
 
-    if (newOrder.quantity > itemInventory.quantity) {
+    if (itemInventory === null || order.quantity > itemInventory.quantity) {
       throw new NotFoundException('Requested Item is out of stock');
     }
 
-    itemInventory.setQuantity(-newOrder.quantity);
+    itemInventory.setQuantity(-order.quantity);
     await this.inventoryRepository.save(itemInventory);
 
     const item = await this.itemsRepository.findOne({ where: { id } });
-    item.orders = [newOrder];
-    await this.itemsRepository.save(item);
+    const newOrder = await this.ordersRepository.create(order);
+    newOrder.item = item;
     return await this.ordersRepository.save(newOrder);
   }
 
@@ -50,11 +49,19 @@ export class OrdersService {
   }
 
   async getOrder(id: number): Promise<Order> {
-    return await this.ordersRepository.findOne({ where: { id } });
+    return await this.ordersRepository.findOne({
+      where: { id },
+      relations: {
+        item: true,
+      },
+    });
   }
 
   async getOrders(): Promise<Order[]> {
-    return await this.ordersRepository.find();
+    return await this.ordersRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.item', 'item')
+      .getMany();
   }
 
   async deleteOrder(id: number): Promise<DeleteResult> {
